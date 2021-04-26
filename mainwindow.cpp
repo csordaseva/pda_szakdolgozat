@@ -25,7 +25,13 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     scene = new QGraphicsScene();
+    QGraphicsScene* scene2 = new QGraphicsScene();
     ui->graphicsView->setScene(scene);
+    ui->pdaView->setScene(scene2);
+    QImage* image = new QImage("D:/Letöltések/pda_q1.dot.svg");
+    QGraphicsPixmapItem* item = new QGraphicsPixmapItem(QPixmap::fromImage(*image));
+    scene2->addItem(item);
+    ui->pdaView->show();
 
     connect(ui->pushButton_close, SIGNAL(clicked()), this, SLOT(close()));
     connect(ui->treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(testSlot(QTreeWidgetItem*, int)));
@@ -235,10 +241,42 @@ void MainWindow::on_pushButton_configs_clicked()
 
 void MainWindow::testSlot(QTreeWidgetItem* item, int col)
 {
-    QPen pen(Qt::black);
-    scene->addRect(QRectF(0,0,100,100),pen);
-    scene->addText(QString(item->text(col)));
-    qDebug() << item->text(col);
+    int distance = 50;
+    int childDistance = 50;
+    scene->clear();
+    QTreeWidgetItem* originalItem = item;
+    //QPen pen(Qt::black);
+    while(item!=viewRoot->parent()){
+        QGraphicsRectItem* actRect = new QGraphicsRectItem(0,0,100,30);
+        scene->addItem(actRect);
+        QGraphicsTextItem* text = new QGraphicsTextItem(item->text(col));
+        text->setHtml("<b>"+item->text(col)+"</b>");
+        scene->addItem(text);
+        //gyerekeit
+        if(item == originalItem){
+            QList<QTreeWidgetItem*> children = item->takeChildren();
+            for(auto child : children){
+
+                QGraphicsRectItem* actChildRect = new QGraphicsRectItem(0,20,100,30);
+                scene->addItem(actChildRect);
+                QGraphicsTextItem* actChildText = new QGraphicsTextItem(child->text(col));
+                scene->addItem(actChildText);
+                actChildText->setDefaultTextColor(Qt::red);
+
+                childDistance += 30;
+                actChildRect->setPos(0, childDistance);
+                //actChildText->moveBy(0,-30);
+                actChildText->setPos(0, 20+childDistance);
+
+            }
+        }
+
+        actRect->setPos(0, distance);
+        text->setPos(0, distance);
+        item = item->parent();
+        distance -= 50;
+    }
+
 }
 
 
