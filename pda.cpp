@@ -275,4 +275,67 @@ void PDA::setAcceptStates(const State &value)
     acceptStates.insert(value);
 }
 
+bool PDA::saveImageGV(std::string file_path){
+    GVC_t *gvc;
+    Agraph_t *g;
+    FILE *fp;
+    gvc = gvContext();
+    fp = fopen((file_path+".dot").c_str(), "r");
+    g = agread(fp, 0);
+    gvLayout(gvc, g, "dot");
+    gvRender(gvc, g, "svg", fopen((file_path+".svg").c_str(), "w"));
+    gvFreeLayout(gvc, g);
+    agclose(g);
+    return (gvFreeContext(gvc));
+}
+
+void PDA::toDot(QString filename)
+{
+    QFile file(filename);
+    if(!file.open(QFile::WriteOnly | QFile::Text)){
+        qDebug() << "Could not open file for writing.";
+    }
+    QTextStream out(&file);
+    out << "digraph {\n" <<
+           "\trankdir=\"TB\"\n" <<
+           "\tnode [shape = circle, color=black]\n" <<
+           "\tstart [label = \"\", shape=none, width=0]\n\t" <<
+           acceptStatesToDot() <<
+           "\t[shape=doublecircle]\n" <<
+           "\tstart -> " << PDA::getStartState() <<
+           transitionsToDot();
+           /*q1 -> q2 [label="a"]
+           q2 -> q4 [label="b"]
+           q1 -> q3 [label="b"]
+           q3 -> q4 [label="a"]
+           q4 -> q5 [label="c"]
+           q4 -> q6 [label="d"]
+           q6 -> q7 [label="d"]*/
+    file.close();
+}
+
+QString PDA::acceptStatesToDot(){
+    QString acceptStates;
+    auto it = PDA::acceptStates.end();
+    it--;
+    for(auto as : PDA::getAcceptStates()){
+        acceptStates += QString::number(as);
+        if(as != *it){
+            acceptStates += ",";
+        }
+    }
+    return acceptStates;
+}
+
+QString PDA::transitionsToDot(){
+    QString transitionList;
+    for(auto tr : PDA::getTransitions()){
+        transitionList += "\n\t";
+        transitionList += QString(QString::number(tr.from) + " -> " + QString::number(tr.to.front()) + "[label=\"" + QString::fromStdString(tr.symbols) + "\"]");
+    }//TODO: if tr.to több elemből áll
+    return transitionList;
+}
+
+
+
 

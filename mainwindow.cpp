@@ -167,15 +167,16 @@ void MainWindow::setTransitionElements(QDomElement root, QString tagname, PDA *p
 void MainWindow::readFromXML(PDA *pda)
 {
     QDomDocument document;
-    QFile file("C:/Users/Éva/Desktop/pda.xml"); //TODO: relative path
+    QString filename = QFileDialog::getOpenFileName(this, "Open file", "C://");
+    QFile file(filename);
 
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
-        qDebug() << "Failed to open file.";
+            qDebug() << "Failed to open file.";
 
     }
     else if(!document.setContent(&file)){
-            qDebug() << "Failed to load document.";
-        file.close();
+    qDebug() << "Failed to load document.";
+    file.close();
     }
     else
     {
@@ -190,7 +191,7 @@ void MainWindow::readFromXML(PDA *pda)
 
     setElements(root, "start_state", "name", pda);
 
-   //qDebug() << "Accept state(s):";
+    //qDebug() << "Accept state(s):";
 
     setElements(root, "accept_state", "name", pda);
 
@@ -198,6 +199,12 @@ void MainWindow::readFromXML(PDA *pda)
 
     setTransitionElements(root, "transition", pda);
     }
+
+    //TODO:?
+    /*if(pda == nullptr)
+        QMessageBox::critical(this, "Error", "PDA could not be loaded from file.");
+    else
+        QMessageBox::information(this, "Loading file", "PDA successfully loaded from file.");*/
 
 }
 
@@ -237,6 +244,14 @@ void MainWindow::on_pushButton_configs_clicked()
     tree.printRecursive();
     createTreeView(tree);
     qDebug() << word << ": " << (pda.isAccepted(word.toStdString()) ? "accepted" : "not accepted") << Qt::endl;
+    if(pda.isAccepted(word.toStdString())){
+        ui->statusbar->showMessage("Word \"" + word + "\" is accepted by the automaton.");
+    }
+    else{
+        ui->statusbar->showMessage("Word \"" + word + "\" is not accepted by the automaton.");
+    }
+   pda.toDot("pda_proba.dot");
+   qDebug() << "dot file created";
 }
 
 void MainWindow::testSlot(QTreeWidgetItem* item, int col)
@@ -245,7 +260,6 @@ void MainWindow::testSlot(QTreeWidgetItem* item, int col)
     int childDistance = 50;
     scene->clear();
     QTreeWidgetItem* originalItem = item;
-    //QPen pen(Qt::black);
     while(item!=viewRoot->parent()){
         QGraphicsRectItem* actRect = new QGraphicsRectItem(0,0,100,30);
         scene->addItem(actRect);
@@ -265,10 +279,10 @@ void MainWindow::testSlot(QTreeWidgetItem* item, int col)
 
                 childDistance += 30;
                 actChildRect->setPos(0, childDistance);
-                //actChildText->moveBy(0,-30);
                 actChildText->setPos(0, 20+childDistance);
 
             }
+            item->addChildren(children);
         }
 
         actRect->setPos(0, distance);

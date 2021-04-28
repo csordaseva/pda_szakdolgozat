@@ -21,6 +21,11 @@ HEADERS += \
 FORMS += \
     mainwindow.ui
 
+INCLUDEPATH += "C:\Program Files\Graphviz\include\graphviz"
+
+LIBS += -L"C:\Program Files\Graphviz\lib" -lgvc
+LIBS += -L"C:\Program Files\Graphviz\lib" -lcgraph
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin

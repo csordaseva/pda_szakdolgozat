@@ -9,6 +9,8 @@
 #include <ostream>
 #include <QDomElement>
 #include "tree.h"
+#include <gvc.h>
+#include <cgraph.h>
 
 class PDA {
 
@@ -71,6 +73,13 @@ public:
     void setTransitions(const Transition &value);
 
     void setAcceptStates(const State &value);
+
+    bool saveImageGV(std::string file_path);
+
+    void toDot(QString filename);
+
+    QString acceptStatesToDot();
+    QString transitionsToDot();
 
 private:
     std::set<State> states;
