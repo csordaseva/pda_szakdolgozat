@@ -264,9 +264,18 @@ void MainWindow::testSlot(QTreeWidgetItem* item, int col)
     int childDistance = 50;
     scene->clear();
     QTreeWidgetItem* originalItem = item;
+    QPainter painter;
     while(item!=viewRoot->parent())
     {
         QGraphicsRectItem* actRect = new QGraphicsRectItem(0,0,100,30);
+        if(item == originalItem)
+        {
+            actRect->setBrush(QBrush(Qt::yellow, Qt::SolidPattern));
+        }
+        else
+        {
+            actRect->setBrush(QBrush(Qt::green, Qt::SolidPattern));
+        }
         scene->addItem(actRect);
         QGraphicsTextItem* text = new QGraphicsTextItem(item->text(col));
         text->setHtml("<b>"+item->text(col)+"</b>");
@@ -279,19 +288,19 @@ void MainWindow::testSlot(QTreeWidgetItem* item, int col)
             {
 
                 QGraphicsRectItem* actChildRect = new QGraphicsRectItem(0,20,100,30);
+                actChildRect->setBrush(QBrush(Qt::red, Qt::SolidPattern));
                 scene->addItem(actChildRect);
                 QGraphicsTextItem* actChildText = new QGraphicsTextItem(child->text(col));
+                actChildText->setHtml("<b>"+item->text(col)+"</b>");
                 scene->addItem(actChildText);
-                actChildText->setDefaultTextColor(Qt::red);
+                actChildText->setDefaultTextColor(Qt::white);
 
                 childDistance += 30;
                 actChildRect->setPos(0, childDistance);
                 actChildText->setPos(0, 20+childDistance);
-
             }
             item->addChildren(children);
         }
-
         actRect->setPos(0, distance);
         text->setPos(0, distance);
         item = item->parent();
