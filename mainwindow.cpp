@@ -2,17 +2,6 @@
 #include "ui_mainwindow.h"
 #include "pda.h"
 
-#include <QFile>
-#include <QDebug>
-#include <QMessageBox>
-#include <QFileDialog>
-#include <QList>
-#include <QtCore>
-#include <QtGui>
-#include <QTreeWidget>
-#include <QGraphicsScene>
-#include <QGraphicsRectItem>
-
 using State = int;
 
 PDA pda;
@@ -75,47 +64,56 @@ void MainWindow::setElements(QDomElement root, QString tagname, QString attribut
     bool convertOK;
     int data;
 
-    for(int i = 0; i < items.count(); i++){
+    for(int i = 0; i < items.count(); i++)
+    {
 
         QDomNode itemnode = items.at(i);
 
-        if(itemnode.isElement()){
+        if(itemnode.isElement())
+        {
 
             QDomElement itemele = itemnode.toElement();
 
             //qDebug() <<itemele.attribute(attribute);
 
-            if(itemele.tagName() == "state"){
+            if(itemele.tagName() == "state")
+            {
                data = itemele.attribute(attribute).toInt(&convertOK);
 
-               if(convertOK){
+               if(convertOK)
+               {
                    pda->setStates(data);
                }
 
             }
-            else if(itemele.tagName() == "start_state"){
+            else if(itemele.tagName() == "start_state")
+            {
                 convertOK = false;
 
                 data = itemele.attribute(attribute).toInt(&convertOK);
 
-                if(convertOK){
+                if(convertOK)
+                {
                        pda->setStartState(data);
                        //qDebug() << "data(startState):" << data;
                 }
 
              }
 
-            else if(itemele.tagName() == "accept_state"){
+            else if(itemele.tagName() == "accept_state")
+            {
 
                 convertOK = false;
 
                 data = itemele.attribute(attribute).toInt(&convertOK);
 
-                if(convertOK){
+                if(convertOK)
+                {
                        pda->setAcceptStates(data);
-                       /*for(auto s : pda->getAcceptStates()) {
+                       /*for(auto s : pda->getAcceptStates())
+                         {
                            qDebug() << "pda->getAccept_states element: " << s;
-                       }*/
+                         }*/
                 }
             }
         }
@@ -124,21 +122,23 @@ void MainWindow::setElements(QDomElement root, QString tagname, QString attribut
 
 void MainWindow::setTransitionElements(QDomElement root, QString tagname, PDA *pda){
 
-
     bool convertOK = false;
     int data;
     QDomNodeList items = root.elementsByTagName(tagname);
 
-    for(int i = 0; i < items.count(); i++){
+    for(int i = 0; i < items.count(); i++)
+    {
         PDA::Transition t;
         QDomNode itemnode = items.at(i);
 
-        if(itemnode.isElement()){
+        if(itemnode.isElement())
+        {
 
             QDomElement itemele = itemnode.toElement();
 
             data=itemele.attribute("from").toInt(&convertOK);
-            if(convertOK){
+            if(convertOK)
+            {
                 t.from = data;
                 //qDebug() << "from:" << t.from;
             }
@@ -149,7 +149,8 @@ void MainWindow::setTransitionElements(QDomElement root, QString tagname, PDA *p
             //qDebug() << "symbol:" << QString::fromStdString(t.symbols);
 
             data=itemele.attribute("to").toInt(&convertOK);
-            if(convertOK){
+            if(convertOK)
+            {
                 t.to.push_back(data);
                 //qDebug() << "to:" << t.to;
             }
@@ -170,34 +171,34 @@ void MainWindow::readFromXML(PDA *pda)
     QString filename = QFileDialog::getOpenFileName(this, "Open file", "C://");
     QFile file(filename);
 
-    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
-            qDebug() << "Failed to open file.";
-
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        qDebug() << "Failed to open file.";
     }
-    else if(!document.setContent(&file)){
-    qDebug() << "Failed to load document.";
-    file.close();
+    else if(!document.setContent(&file))
+    {
+        qDebug() << "Failed to load document.";
+        file.close();
     }
     else
     {
+        QDomElement root = document.firstChildElement();
 
-    QDomElement root = document.firstChildElement();
+        //qDebug() << "States:";
 
-    //qDebug() << "States:";
+        setElements(root,"state", "name", pda);
 
-    setElements(root,"state", "name", pda);
+        //qDebug() << "Start state:";
 
-    //qDebug() << "Start state:";
+        setElements(root, "start_state", "name", pda);
 
-    setElements(root, "start_state", "name", pda);
+        //qDebug() << "Accept state(s):";
 
-    //qDebug() << "Accept state(s):";
+        setElements(root, "accept_state", "name", pda);
 
-    setElements(root, "accept_state", "name", pda);
+        //qDebug() << "Transitions:";
 
-    //qDebug() << "Transitions:";
-
-    setTransitionElements(root, "transition", pda);
+        setTransitionElements(root, "transition", pda);
     }
 
     //TODO:?
@@ -205,13 +206,13 @@ void MainWindow::readFromXML(PDA *pda)
         QMessageBox::critical(this, "Error", "PDA could not be loaded from file.");
     else
         QMessageBox::information(this, "Loading file", "PDA successfully loaded from file.");*/
-
 }
 
 void MainWindow::on_pushButton_load_clicked()
 {
     readFromXML(&pda);
     QMessageBox::information(this, "Loading file", "PDA successfully loaded from file.");
+
     /*qDebug() << "pda->getStartState: " << pda.getStartState() << "\n";
     qDebug() << "pda->getStates: ";
     for(auto a : pda.getStates()){
@@ -244,14 +245,17 @@ void MainWindow::on_pushButton_configs_clicked()
     tree.printRecursive();
     createTreeView(tree);
     qDebug() << word << ": " << (pda.isAccepted(word.toStdString()) ? "accepted" : "not accepted") << Qt::endl;
-    if(pda.isAccepted(word.toStdString())){
+    if(pda.isAccepted(word.toStdString()))
+    {
         ui->statusbar->showMessage("Word \"" + word + "\" is accepted by the automaton.");
     }
-    else{
+    else
+    {
         ui->statusbar->showMessage("Word \"" + word + "\" is not accepted by the automaton.");
     }
    pda.toDot("pda_proba.dot");
    qDebug() << "dot file created";
+   //pda.saveImageGV("pda_proba");
 }
 
 void MainWindow::testSlot(QTreeWidgetItem* item, int col)
@@ -260,16 +264,19 @@ void MainWindow::testSlot(QTreeWidgetItem* item, int col)
     int childDistance = 50;
     scene->clear();
     QTreeWidgetItem* originalItem = item;
-    while(item!=viewRoot->parent()){
+    while(item!=viewRoot->parent())
+    {
         QGraphicsRectItem* actRect = new QGraphicsRectItem(0,0,100,30);
         scene->addItem(actRect);
         QGraphicsTextItem* text = new QGraphicsTextItem(item->text(col));
         text->setHtml("<b>"+item->text(col)+"</b>");
         scene->addItem(text);
         //gyerekeit
-        if(item == originalItem){
+        if(item == originalItem)
+        {
             QList<QTreeWidgetItem*> children = item->takeChildren();
-            for(auto child : children){
+            for(auto child : children)
+            {
 
                 QGraphicsRectItem* actChildRect = new QGraphicsRectItem(0,20,100,30);
                 scene->addItem(actChildRect);
@@ -292,7 +299,6 @@ void MainWindow::testSlot(QTreeWidgetItem* item, int col)
     }
 
 }
-
 
 void MainWindow::createTreeView( TreeNode<PDA::Configuration> root, QTreeWidgetItem* parent )
 {

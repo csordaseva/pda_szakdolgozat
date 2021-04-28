@@ -8,6 +8,10 @@
 #include <string>
 #include <ostream>
 #include <QDomElement>
+#include <QDomDocument>
+#include <QFile>
+#include <QDebug>
+#include <QTreeWidgetItem>
 #include "tree.h"
 #include <gvc.h>
 #include <cgraph.h>
@@ -40,10 +44,25 @@ public:
         QString createOutputString();
     };
 
-    PDA(std::set<State> states, State start_state, std::set<State> accept_states, Transitions transitions);
     PDA();
 
+    PDA(std::set<State> states, State start_state, std::set<State> accept_states, Transitions transitions);
+
     State getStartState() const;
+
+    std::set<State> getStates() const;
+
+    std::set<State> getAcceptStates() const;
+
+    Transitions getTransitions() const;
+
+    void setStartState(const State &value);
+
+    void setStates(const State &value);
+
+    void setTransitions(const Transition &value);
+
+    void setAcceptStates(const State &value);
 
     bool isAcceptingState(State state) const;
 
@@ -57,28 +76,14 @@ public:
 
     Configuration move(const Configuration& c, const Transition& t) const;
 
-
-    std::set<State> getStates() const;
-
-    std::set<State> getAcceptStates() const;
-
-    Transitions getTransitions() const;
-
     void writeXML();
-
-    void setStartState(const State &value);
-
-    void setStates(const State &value);
-
-    void setTransitions(const Transition &value);
-
-    void setAcceptStates(const State &value);
 
     bool saveImageGV(std::string file_path);
 
     void toDot(QString filename);
 
     QString acceptStatesToDot();
+
     QString transitionsToDot();
 
 private:

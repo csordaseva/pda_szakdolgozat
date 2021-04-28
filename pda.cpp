@@ -1,63 +1,65 @@
 #include "pda.h"
 
-#include <QDomDocument>
-#include <QFile>
-#include <QDebug>
-#include <QTreeWidgetItem>
-
 using State = int;
 using StackSymbol = char;
 using Transitions = std::vector<PDA::Transition>;
 
 bool PDA::Configuration::operator< (const Configuration& other) const {
-    return state < other.state || (state == other.state && remaining < other.remaining) || (state == other.state && remaining == other.remaining && stack < other.stack);
+    return state < other.state || (state == other.state && remaining < other.remaining)
+            || (state == other.state && remaining == other.remaining && stack < other.stack);
 }
 
 bool PDA::Configuration::operator== (const Configuration& other) const {
     return state == other.state && remaining == other.remaining && stack == other.stack;
 }
 
-
-
 PDA::PDA(std::set<State> states, State start_state, std::set<State> accept_states, Transitions transitions)
     : states(states), start_state(start_state), acceptStates(accept_states), transitions(transitions) {}
 
-PDA::PDA(){
+PDA::PDA(){}
 
+State PDA::getStartState() const {
+    return start_state;
 }
 
-
-State PDA::getStartState() const { return start_state; }
-bool PDA::isAcceptingState(State state) const { return acceptStates.count(state) == 1; }
-
+bool PDA::isAcceptingState(State state) const {
+    return acceptStates.count(state) == 1;
+}
 
 bool PDA::isAccepted(std::string word) const {
     std::set<PDA::Configuration> open_configurations;
     open_configurations.insert(PDA::Configuration{ getStartState(),word, {} });
-
-    try {
-        while (!open_configurations.empty()) {
+    try
+    {
+        while (!open_configurations.empty())
+        {
             Configuration selected = *open_configurations.begin();
             open_configurations.erase(open_configurations.begin());
-            if (isAcceptingState(selected.state) && selected.remaining.empty() && selected.stack.empty()) throw true;
+            if (isAcceptingState(selected.state) && selected.remaining.empty() && selected.stack.empty())
+            {
+                throw true;
+            }
             else
             {
                 open_configurations.merge(yieldInOneStep(selected));
             }
         }
     }
-    catch (bool) { return true; }
+    catch (bool)
+    {
+        return true;
+    }
     return false;
 }
 
 std::set<PDA::Configuration> PDA::yieldInOneStep(Configuration& c) const {
     std::set<PDA::Configuration> new_configurations;
-
     for (auto& element : transitions)
     {
         if (canMove(c,element))
+        {
             new_configurations.insert(move(c, element));
-
+        }
     }
     return new_configurations;
 }
@@ -65,7 +67,8 @@ std::set<PDA::Configuration> PDA::yieldInOneStep(Configuration& c) const {
 
 
 void PDA::expand(TreeNode<Configuration>& configuration_tree) const {
-    for (auto child_configuration : yieldInOneStep(configuration_tree.data)) {
+    for (auto child_configuration : yieldInOneStep(configuration_tree.data))
+    {
         TreeNode<Configuration> child{ child_configuration , {} };
         expand(child);
         configuration_tree.children.push_back(child);
@@ -79,9 +82,10 @@ TreeNode<PDA::Configuration> PDA::getConfigurationTree(std::string word) const {
 }
 
 
-std::ostream& operator<< (std::ostream& s, const PDA::Configuration& c) {
+std::ostream& operator<< (std::ostream& s, const PDA::Configuration& c){
     s << "( " << c.state << " , ";
-    if (c.remaining.empty()) {
+    if (c.remaining.empty())
+    {
         s << "E, ";
     }
     else
@@ -89,17 +93,18 @@ std::ostream& operator<< (std::ostream& s, const PDA::Configuration& c) {
         s << c.remaining << ",  ";
     }
 
-    if (c.stack.empty()) {
+    if (c.stack.empty())
+    {
         s << "E";
     }
-    else {
-
+    else
+    {
         std::list<StackSymbol>::const_iterator it;
-        for (it = c.stack.begin(); it != c.stack.end(); ++it) {
+        for (it = c.stack.begin(); it != c.stack.end(); ++it)
+        {
             s << *it;
         }
     }
-
     s << ")";
     return s;
 }
@@ -123,15 +128,17 @@ bool PDA::Configuration::starts_with(std::string symbols) const{
 
 }
 
-bool PDA::Configuration::are_top(std::string symbols) const {
-
-    if (stack.size() < symbols.size()) {
+bool PDA::Configuration::are_top(std::string symbols) const{
+    if (stack.size() < symbols.size())
+    {
         return false;
     }
-    else {
+    else
+    {
         std::list<StackSymbol>::const_iterator it;
         unsigned int i = 0;
-        for (it = stack.begin(); i < symbols.size(); ++it) {
+        for (it = stack.begin(); i < symbols.size(); ++it)
+        {
             if (*it != symbols[i])
             {
                 return false;
@@ -142,8 +149,7 @@ bool PDA::Configuration::are_top(std::string symbols) const {
     }
 }
 
-QString PDA::Configuration::createOutputString()
-{
+QString PDA::Configuration::createOutputString(){
     QString stackString{};
     for( auto it : stack)
     {
@@ -160,13 +166,13 @@ QString PDA::Configuration::createOutputString()
     return QString( "(" + QString::number(state) + " , " + rem  + " , " + stack + ")");
 }
 
-bool PDA::canMove(const Configuration& c, const Transition& t) const
-{
+bool PDA::canMove(const Configuration& c, const Transition& t) const{
     return c.state == t.from && c.starts_with(t.symbols) && c.are_top(t.pop);
 }
 
 PDA::Configuration PDA::move(const Configuration& c, const Transition& t) const {
-    if (canMove(c, t)) {
+    if (canMove(c, t))
+    {
         auto new_c = Configuration(c);
         for (unsigned int i = 0; i < t.to.size(); i++)
         {
@@ -174,33 +180,32 @@ PDA::Configuration PDA::move(const Configuration& c, const Transition& t) const 
             new_c.remaining = new_c.remaining.substr(t.symbols.size());
 
             for (unsigned int j = 0; j < t.pop.size(); j++)
+            {
                 new_c.stack.pop_front();
-
+            }
             for (unsigned int j = t.push.size(); j > 0; j--)
+            {
                 new_c.stack.push_front(t.push[j-1]);
+            }
         }
         return new_c;
     }
     return c;
 }
 
-std::set<State> PDA::getStates() const
-{
+std::set<State> PDA::getStates() const{
     return states;
 }
 
-std::set<State> PDA::getAcceptStates() const
-{
+std::set<State> PDA::getAcceptStates() const{
     return acceptStates;
 }
 
-Transitions PDA::getTransitions() const
-{
+Transitions PDA::getTransitions() const{
     return transitions;
 }
 
-void PDA::writeXML()
-{
+void PDA::writeXML(){    
     QDomDocument document;
     QDomElement root = document.createElement("pda");
     document.appendChild(root);
@@ -208,7 +213,8 @@ void PDA::writeXML()
     QDomElement statesNode = document.createElement("states");
     root.appendChild(statesNode);
 
-    for(unsigned int i = 0; i < getStates().size(); i++){
+    for(unsigned int i = 0; i < getStates().size(); i++)
+    {
         QDomElement node = document.createElement("state");
         node.setAttribute("name", *next(getStates().begin(),i));
         statesNode.appendChild(node);
@@ -221,7 +227,8 @@ void PDA::writeXML()
     QDomElement acceptStates = document.createElement("acceptStates");
     root.appendChild(acceptStates);
 
-    for(unsigned int i = 0; i < getAcceptStates().size(); i++){
+    for(unsigned int i = 0; i < getAcceptStates().size(); i++)
+    {
         QDomElement node = document.createElement("accept_state");
         node.setAttribute("name", *next(getAcceptStates().begin(),i));
         acceptStates.appendChild(node);
@@ -230,9 +237,11 @@ void PDA::writeXML()
     QDomElement transitions = document.createElement("transitions");
     root.appendChild(transitions);
 
-    for(unsigned int i = 0; i < getTransitions().size(); i++){
+    for(unsigned int i = 0; i < getTransitions().size(); i++)
+    {
         QDomElement node = document.createElement("transition");
-        for(unsigned int j = 0; j < getTransitions().at(i).to.size();j++){
+        for(unsigned int j = 0; j < getTransitions().at(i).to.size();j++)
+        {
             node.setAttribute("from", getTransitions().at(i).from);
             node.setAttribute("symbol", QString::fromStdString(getTransitions().at(i).symbols));
             node.setAttribute("to", getTransitions().at(i).to.at(j));
@@ -243,11 +252,13 @@ void PDA::writeXML()
     }
 
     QFile file("C:/Users/Éva/Desktop/pda.xml");
-    if(!file.open(QIODevice::WriteOnly | QIODevice::Text)){
+    if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
         qDebug() << "Failed to open file for writing.";
         return;
     }
-    else{
+    else
+    {
         QTextStream stream(&file);
         stream << document.toString();
         file.close();
@@ -255,23 +266,19 @@ void PDA::writeXML()
     }
 }
 
-void PDA::setStartState(const State &value)
-{
+void PDA::setStartState(const State &value){
     start_state = value;
 }
 
-void PDA::setStates(const State &value)
-{
+void PDA::setStates(const State &value){
     states.insert(value);
 }
 
-void PDA::setTransitions(const Transition &value)
-{
+void PDA::setTransitions(const Transition &value){
     transitions.push_back(value);
 }
 
-void PDA::setAcceptStates(const State &value)
-{
+void PDA::setAcceptStates(const State &value){
     acceptStates.insert(value);
 }
 
@@ -289,10 +296,10 @@ bool PDA::saveImageGV(std::string file_path){
     return (gvFreeContext(gvc));
 }
 
-void PDA::toDot(QString filename)
-{
+void PDA::toDot(QString filename){
     QFile file(filename);
-    if(!file.open(QFile::WriteOnly | QFile::Text)){
+    if(!file.open(QFile::WriteOnly | QFile::Text))
+    {
         qDebug() << "Could not open file for writing.";
     }
     QTextStream out(&file);
@@ -303,14 +310,8 @@ void PDA::toDot(QString filename)
            acceptStatesToDot() <<
            "\t[shape=doublecircle]\n" <<
            "\tstart -> " << PDA::getStartState() <<
-           transitionsToDot();
-           /*q1 -> q2 [label="a"]
-           q2 -> q4 [label="b"]
-           q1 -> q3 [label="b"]
-           q3 -> q4 [label="a"]
-           q4 -> q5 [label="c"]
-           q4 -> q6 [label="d"]
-           q6 -> q7 [label="d"]*/
+           transitionsToDot() <<
+           "\n}";
     file.close();
 }
 
@@ -318,9 +319,11 @@ QString PDA::acceptStatesToDot(){
     QString acceptStates;
     auto it = PDA::acceptStates.end();
     it--;
-    for(auto as : PDA::getAcceptStates()){
+    for(auto as : PDA::getAcceptStates())
+    {
         acceptStates += QString::number(as);
-        if(as != *it){
+        if(as != *it)
+        {
             acceptStates += ",";
         }
     }
@@ -329,13 +332,31 @@ QString PDA::acceptStatesToDot(){
 
 QString PDA::transitionsToDot(){
     QString transitionList;
-    for(auto tr : PDA::getTransitions()){
+    for(auto tr : PDA::getTransitions())
+    {
         transitionList += "\n\t";
-        transitionList += QString(QString::number(tr.from) + " -> " + QString::number(tr.to.front()) + "[label=\"" + QString::fromStdString(tr.symbols) + "\"]");
-    }//TODO: if tr.to több elemből áll
+        if(QString::fromStdString(tr.symbols) == "" && tr.to.size() == 1)
+        {
+           transitionList += QString(QString::number(tr.from) + " -> " + QString::number(tr.to.front()) + "[label=\"e\"]");
+        }
+        else if(QString::fromStdString(tr.symbols) == "" && tr.to.size() > 1)
+        {
+           for(auto t : tr.to)
+           {
+               transitionList += QString(QString::number(tr.from) + " -> " + QString::number(t) + "[label=\"e\"]");
+           }
+        }
+        else if(QString::fromStdString(tr.symbols) != "" && tr.to.size() == 1)
+        {
+            transitionList += QString(QString::number(tr.from) + " -> " + QString::number(tr.to.front()) + "[label=\"" + QString::fromStdString(tr.symbols) + "\"]");
+        }
+        else
+        {
+            for(auto t : tr.to)
+            {
+                transitionList += QString(QString::number(tr.from) + " -> " + QString::number(t) + "[label=\"e\"]");
+            }
+        }
+    }
     return transitionList;
 }
-
-
-
-

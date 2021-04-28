@@ -2,12 +2,21 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "pda.h"
-
 #include <QTreeWidgetItem>
 #include <QMap>
 #include <QPair>
 #include <QFileDialog>
+#include <QFile>
+#include <QDebug>
+#include <QMessageBox>
+#include <QFileDialog>
+#include <QList>
+#include <QtCore>
+#include <QtGui>
+#include <QTreeWidget>
+#include <QGraphicsScene>
+#include <QGraphicsRectItem>
+#include "pda.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
