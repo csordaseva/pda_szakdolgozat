@@ -32,19 +32,20 @@ public:
     void readFromXML(PDA *pda);
     void setTransitionElements(QDomElement root, QString tagname, PDA *pda);
     void setElements(QDomElement root, QString tagname, QString attribute, PDA *pda);
+    //static bool itemLess(const QGraphicsItem* item1, const QGraphicsItem* item2);
 
 private slots:
     void on_pushButton_load_clicked();
 
     void on_pushButton_configs_clicked();
 
-    void testSlot(QTreeWidgetItem* item, int col);
+    void doubleClickedOnConfigElement(QTreeWidgetItem* item, int col);
 
 private:
     Ui::MainWindow *ui;
     QTreeWidgetItem* viewRoot{nullptr};
 
-    QVector<QPair<QString, QVector<QString> > > myTree;
+    //QVector<QPair<QString, QVector<QString> > > myTree;
 
     void createTreeView( TreeNode<PDA::Configuration> root, QTreeWidgetItem* parent = nullptr );
     //void buildTree( TreeNode<PDA::Configuration> root );

@@ -7,6 +7,11 @@ using State = int;
 PDA pda;
 QGraphicsScene* scene;
 
+bool itemLess(const QGraphicsItem* item1, const QGraphicsItem* item2)
+{
+    return item1->sceneBoundingRect().center().y() < item2->sceneBoundingRect().center().y();
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -23,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pdaView->show();
 
     connect(ui->pushButton_close, SIGNAL(clicked()), this, SLOT(close()));
-    connect(ui->treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(testSlot(QTreeWidgetItem*, int)));
+    connect(ui->treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(doubleClickedOnConfigElement(QTreeWidgetItem*, int)));
 }
 
 MainWindow::~MainWindow()
@@ -168,7 +173,8 @@ void MainWindow::setTransitionElements(QDomElement root, QString tagname, PDA *p
 void MainWindow::readFromXML(PDA *pda)
 {
     QDomDocument document;
-    QString filename = QFileDialog::getOpenFileName(this, "Open file", "C://");
+    QString selfilter = tr("XML files (*.xml)");
+    QString filename = QFileDialog::getOpenFileName(this, "Open file", "C://", selfilter);
     QFile file(filename);
 
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -258,27 +264,26 @@ void MainWindow::on_pushButton_configs_clicked()
    //pda.saveImageGV("pda_proba");
 }
 
-void MainWindow::testSlot(QTreeWidgetItem* item, int col)
+void MainWindow::doubleClickedOnConfigElement(QTreeWidgetItem* item, int col)
 {
-    int distance = 50;
-    int childDistance = 50;
+    int distance = 100;
+    int childDistance = 100;
     scene->clear();
-    QTreeWidgetItem* originalItem = item;
-    QPainter painter;
+    QTreeWidgetItem* originalItem = item;    
     while(item!=viewRoot->parent())
     {
-        QGraphicsRectItem* actRect = new QGraphicsRectItem(0,0,100,30);
+        //QGraphicsRectItem* actRect = new QGraphicsRectItem(0,0,100,30);
+        //scene->addItem(actRect);
+        QGraphicsTextItem* text = new QGraphicsTextItem(item->text(col));
         if(item == originalItem)
         {
-            actRect->setBrush(QBrush(Qt::yellow, Qt::SolidPattern));
+            text->setHtml("<h1><b><div style='background-color:yellow; text-align: center'>"+item->text(col)+"</div></b></h1>");
         }
         else
         {
-            actRect->setBrush(QBrush(Qt::green, Qt::SolidPattern));
+            text->setHtml("<h1><b><div style='background-color:#83f52c; text-align: center'>"+item->text(col)+"</div></b></h1>");
         }
-        scene->addItem(actRect);
-        QGraphicsTextItem* text = new QGraphicsTextItem(item->text(col));
-        text->setHtml("<b>"+item->text(col)+"</b>");
+
         scene->addItem(text);
         //gyerekeit
         if(item == originalItem)
@@ -287,26 +292,35 @@ void MainWindow::testSlot(QTreeWidgetItem* item, int col)
             for(auto child : children)
             {
 
-                QGraphicsRectItem* actChildRect = new QGraphicsRectItem(0,20,100,30);
-                actChildRect->setBrush(QBrush(Qt::red, Qt::SolidPattern));
-                scene->addItem(actChildRect);
+              //QGraphicsRectItem* actChildRect = new QGraphicsRectItem(0,20,100,30);
+              //actChildRect->setBrush(QBrush(Qt::red, Qt::SolidPattern));
+              //scene->addItem(actChildRect);
                 QGraphicsTextItem* actChildText = new QGraphicsTextItem(child->text(col));
-                actChildText->setHtml("<b>"+item->text(col)+"</b>");
+                actChildText->setHtml("<h1><b><div style='background-color:red; text-align:center'>"+child->text(col)+"</div></b></h1>");
                 scene->addItem(actChildText);
                 actChildText->setDefaultTextColor(Qt::white);
 
-                childDistance += 30;
-                actChildRect->setPos(0, childDistance);
-                actChildText->setPos(0, 20+childDistance);
+                childDistance += 60;
+                //actChildRect->setPos(0, 20+childDistance);
+                actChildText->setPos(0, 40+childDistance);
             }
             item->addChildren(children);
         }
-        actRect->setPos(0, distance);
+        //actRect->setPos(0, distance);
         text->setPos(0, distance);
         item = item->parent();
-        distance -= 50;
+        distance -= 100;
     }
-
+    QList<QGraphicsItem *> rects = scene->items(Qt::AscendingOrder);
+    std::sort(rects.begin(), rects.end(), itemLess);
+    QPoint start, end;
+    for(int i = 0; i < rects.size()-1; i++)
+    {
+        //meg kell különböztetni a gyerekelemeket
+        start = QPoint(rects.at(i)->scenePos().x()+65, rects.at(i)->scenePos().y()+rects.at(0)->boundingRect().height());
+        end = QPoint(rects.at(i+1)->scenePos().x()+65, rects.at(i+1)->scenePos().y());
+        scene->addLine(QLine(start, end));
+    }
 }
 
 void MainWindow::createTreeView( TreeNode<PDA::Configuration> root, QTreeWidgetItem* parent )

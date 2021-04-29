@@ -163,7 +163,7 @@ QString PDA::Configuration::createOutputString(){
     if(stackString.isEmpty()){
         stack = "E";
     }
-    return QString( "(" + QString::number(state) + " , " + rem  + " , " + stack + ")");
+    return QString("(" + QString::number(state) + " , " + rem  + " , " + stack +")");
 }
 
 bool PDA::canMove(const Configuration& c, const Transition& t) const{
