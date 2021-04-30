@@ -266,6 +266,13 @@ void PDA::writeXML(){
     }
 }
 
+void PDA::toSVG(QString dotfilename)
+{
+    QString command = "dot -Tsvg " + dotfilename + " -o " + dotfilename + ".svg";
+    QProcess::execute(command);
+    //qDebug() << "command executed";
+}
+
 void PDA::setStartState(const State &value){
     start_state = value;
 }
@@ -280,20 +287,6 @@ void PDA::setTransitions(const Transition &value){
 
 void PDA::setAcceptStates(const State &value){
     acceptStates.insert(value);
-}
-
-bool PDA::saveImageGV(std::string file_path){
-    GVC_t *gvc;
-    Agraph_t *g;
-    FILE *fp;
-    gvc = gvContext();
-    fp = fopen((file_path+".dot").c_str(), "r");
-    g = agread(fp, 0);
-    gvLayout(gvc, g, "dot");
-    gvRender(gvc, g, "svg", fopen((file_path+".svg").c_str(), "w"));
-    gvFreeLayout(gvc, g);
-    agclose(g);
-    return (gvFreeContext(gvc));
 }
 
 void PDA::toDot(QString filename){

@@ -5,7 +5,7 @@
 #include <map>
 #include <list>
 #include <stack>
-#include <string>
+#include "string.h"
 #include <ostream>
 #include <QDomElement>
 #include <QDomDocument>
@@ -15,6 +15,7 @@
 #include "tree.h"
 #include <gvc.h>
 #include <cgraph.h>
+#include <qprocess.h>
 
 class PDA {
 
@@ -78,7 +79,7 @@ public:
 
     void writeXML();
 
-    bool saveImageGV(std::string file_path);
+    void toSVG(QString dotfilename);
 
     void toDot(QString filename);
 

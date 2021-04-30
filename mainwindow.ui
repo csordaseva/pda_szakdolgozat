@@ -16,63 +16,85 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="QTreeWidget" name="treeWidget">
-      <column>
-       <property name="text">
-        <string notr="true">1</string>
-       </property>
-      </column>
-     </widget>
-    </item>
-    <item row="0" column="2">
-     <widget class="QGraphicsView" name="pdaView"/>
-    </item>
-    <item row="0" column="1">
-     <layout class="QVBoxLayout" name="verticalLayout_2">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <widget class="QTreeWidget" name="treeWidget">
+        <column>
+         <property name="text">
+          <string notr="true">1</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QPushButton" name="pushButton_load">
-          <property name="text">
-           <string>Load PDA from file</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout">
+         <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="QLabel" name="label">
+           <widget class="QPushButton" name="pushButton_load">
             <property name="text">
-             <string>Give a word:</string>
-            </property>
-            <property name="buddy">
-             <cstring>inputWord</cstring>
+             <string>Load PDA from file</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="inputWord"/>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Give a word:</string>
+              </property>
+              <property name="buddy">
+               <cstring>inputWord</cstring>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="inputWord"/>
+            </item>
+           </layout>
           </item>
           <item>
            <widget class="QPushButton" name="pushButton_configs">
             <property name="text">
-             <string>Get configurations</string>
+             <string>Get configurations automatically</string>
             </property>
            </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_configs_manual">
+            <property name="text">
+             <string>Get configurations manually</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLabel" name="result">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_close">
+            <property name="text">
+             <string>Close</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGraphicsView" name="graphicsView"/>
           </item>
          </layout>
         </item>
        </layout>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_close">
-        <property name="text">
-         <string>Close</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGraphicsView" name="graphicsView"/>
+       <widget class="QGraphicsView" name="pdaView"/>
       </item>
      </layout>
     </item>

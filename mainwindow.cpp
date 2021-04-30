@@ -6,6 +6,7 @@ using State = int;
 
 PDA pda;
 QGraphicsScene* scene;
+QGraphicsScene* scene2;
 
 bool itemLess(const QGraphicsItem* item1, const QGraphicsItem* item2)
 {
@@ -19,15 +20,16 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     scene = new QGraphicsScene();
-    QGraphicsScene* scene2 = new QGraphicsScene();
     ui->graphicsView->setScene(scene);
+    scene2 = new QGraphicsScene();
     ui->pdaView->setScene(scene2);
-    QImage* image = new QImage("D:/Letöltések/pda_q1.dot.svg");
+    QImage* image = new QImage("initial.jpg");
     QGraphicsPixmapItem* item = new QGraphicsPixmapItem(QPixmap::fromImage(*image));
     scene2->addItem(item);
     ui->pdaView->show();
 
     connect(ui->pushButton_close, SIGNAL(clicked()), this, SLOT(close()));
+    connect(ui->treeWidget, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(clickedOnConfigElement(QTreeWidgetItem*, int)));
     connect(ui->treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(doubleClickedOnConfigElement(QTreeWidgetItem*, int)));
 }
 
@@ -206,18 +208,19 @@ void MainWindow::readFromXML(PDA *pda)
 
         setTransitionElements(root, "transition", pda);
     }
-
-    //TODO:?
-    /*if(pda == nullptr)
-        QMessageBox::critical(this, "Error", "PDA could not be loaded from file.");
-    else
-        QMessageBox::information(this, "Loading file", "PDA successfully loaded from file.");*/
 }
 
 void MainWindow::on_pushButton_load_clicked()
 {
     readFromXML(&pda);
     QMessageBox::information(this, "Loading file", "PDA successfully loaded from file.");
+    QString dotFileName("pda.dot");
+    pda.toDot(dotFileName);
+    pda.toSVG(dotFileName);
+    QImage* image = new QImage(dotFileName + ".svg");
+    QGraphicsPixmapItem* item = new QGraphicsPixmapItem(QPixmap::fromImage(*image));
+    scene2->addItem(item);
+    ui->pdaView->show();
 
     /*qDebug() << "pda->getStartState: " << pda.getStartState() << "\n";
     qDebug() << "pda->getStates: ";
@@ -248,28 +251,35 @@ void MainWindow::on_pushButton_configs_clicked()
 
 
     //qDebug() << "\nAll of the possible configurations:\n";
-    tree.printRecursive();
+    //tree.printRecursive();
     createTreeView(tree);
-    qDebug() << word << ": " << (pda.isAccepted(word.toStdString()) ? "accepted" : "not accepted") << Qt::endl;
+    //qDebug() << word << ": " << (pda.isAccepted(word.toStdString()) ? "accepted" : "not accepted") << Qt::endl;
     if(pda.isAccepted(word.toStdString()))
     {
-        ui->statusbar->showMessage("Word \"" + word + "\" is accepted by the automaton.");
+        ui->result->setText("<h3><div style= 'color:green'>Word \"" + word + "\" is accepted by the automaton.</div></h3>");
     }
     else
     {
-        ui->statusbar->showMessage("Word \"" + word + "\" is not accepted by the automaton.");
+        ui->result->setText("<h3><div style= 'color:red'>Word \"" + word + "\" is not accepted by the automaton.</div></h3>");
     }
-   pda.toDot("pda_proba.dot");
-   qDebug() << "dot file created";
-   //pda.saveImageGV("pda_proba");
 }
 
-void MainWindow::doubleClickedOnConfigElement(QTreeWidgetItem* item, int col)
+void MainWindow::clickedOnConfigElement(QTreeWidgetItem* item, int col)
 {
     int distance = 100;
     int childDistance = 100;
     scene->clear();
-    QTreeWidgetItem* originalItem = item;    
+    QTreeWidgetItem* originalItem = item;
+
+    /*QStringList config = item->text(col).split(QRegExp("\\W+"));
+    QString first, second, third;
+    first = config.at(1);
+    second = config.at(2);
+    third = config.at(3);
+    QGraphicsTextItem* state = new QGraphicsTextItem(first);
+    QGraphicsTextItem* rem = new QGraphicsTextItem(second);
+    QGraphicsTextItem* stack = new QGraphicsTextItem(third);*/
+
     while(item!=viewRoot->parent())
     {
         //QGraphicsRectItem* actRect = new QGraphicsRectItem(0,0,100,30);
@@ -277,14 +287,14 @@ void MainWindow::doubleClickedOnConfigElement(QTreeWidgetItem* item, int col)
         QGraphicsTextItem* text = new QGraphicsTextItem(item->text(col));
         if(item == originalItem)
         {
-            text->setHtml("<h1><b><div style='background-color:yellow; text-align: center'>"+item->text(col)+"</div></b></h1>");
-        }
-        else
-        {
-            text->setHtml("<h1><b><div style='background-color:#83f52c; text-align: center'>"+item->text(col)+"</div></b></h1>");
+            text->setHtml("<h1><b><span style='background-color:yellow'>"+item->text(col)+"</span></b></h1>");
         }
 
-        scene->addItem(text);
+        else
+        {
+            text->setHtml("<h1><b><span style='background-color:#83f52c'>"+item->text(col)+"</span></b></h1>");
+        }
+
         //gyerekeit
         if(item == originalItem)
         {
@@ -296,7 +306,7 @@ void MainWindow::doubleClickedOnConfigElement(QTreeWidgetItem* item, int col)
               //actChildRect->setBrush(QBrush(Qt::red, Qt::SolidPattern));
               //scene->addItem(actChildRect);
                 QGraphicsTextItem* actChildText = new QGraphicsTextItem(child->text(col));
-                actChildText->setHtml("<h1><b><div style='background-color:red; text-align:center'>"+child->text(col)+"</div></b></h1>");
+                actChildText->setHtml("<h1><b><span style='background-color:red'>"+child->text(col)+"</span></b></h1>");
                 scene->addItem(actChildText);
                 actChildText->setDefaultTextColor(Qt::white);
 
@@ -307,6 +317,7 @@ void MainWindow::doubleClickedOnConfigElement(QTreeWidgetItem* item, int col)
             item->addChildren(children);
         }
         //actRect->setPos(0, distance);
+        scene->addItem(text);
         text->setPos(0, distance);
         item = item->parent();
         distance -= 100;
@@ -321,6 +332,20 @@ void MainWindow::doubleClickedOnConfigElement(QTreeWidgetItem* item, int col)
         end = QPoint(rects.at(i+1)->scenePos().x()+65, rects.at(i+1)->scenePos().y());
         scene->addLine(QLine(start, end));
     }
+}
+
+void MainWindow::doubleClickedOnConfigElement(QTreeWidgetItem* item, int col){
+    TreeNode<PDA::Configuration> tree = pda.getConfigurationTree(ui->inputWord->text().toStdString());
+    createTreeViewByClicking(searchByConfigName(tree, item->text(col)), item);
+}
+
+void MainWindow::on_pushButton_configs_manual_clicked()
+{
+    QString word;
+    word = ui->inputWord->text();
+    TreeNode<PDA::Configuration> tree = pda.getConfigurationTree(word.toStdString());
+    viewRoot = new QTreeWidgetItem(ui->treeWidget, QStringList(QString(tree.data.createOutputString())));
+
 }
 
 void MainWindow::createTreeView( TreeNode<PDA::Configuration> root, QTreeWidgetItem* parent )
@@ -339,5 +364,33 @@ void MainWindow::createTreeView( TreeNode<PDA::Configuration> root, QTreeWidgetI
     for (auto child : root.children)
     {
         createTreeView(child, tmp);
+    }
+}
+
+void MainWindow::createTreeViewByClicking( TreeNode<PDA::Configuration> root, QTreeWidgetItem* parent )
+{
+    QTreeWidgetItem* tmp;
+    for (auto child : root.children)
+    {
+        tmp = new QTreeWidgetItem(parent, QStringList(QString(child.data.createOutputString())));
+    }
+
+}
+
+TreeNode<PDA::Configuration> MainWindow::searchByConfigName(TreeNode<PDA::Configuration> node, QString config)
+{
+    QQueue<TreeNode<PDA::Configuration>> q;
+    q.enqueue(node);
+    while(!q.empty()){
+        TreeNode<PDA::Configuration> act = q.dequeue();
+        if(act.data.createOutputString() == config)
+        {
+            return act;
+        }
+        else{
+            for(auto child : act.children){
+                q.enqueue(child);
+            }
+        }
     }
 }
