@@ -275,32 +275,61 @@ void MainWindow::clickedOnConfigElement(QTreeWidgetItem* item, int col)
     scene->clear();
     QTreeWidgetItem* originalItem = item;
 
-    /*QStringList config = item->text(col).split(QRegExp("\\W+"));
-    QString first, second, third;
-    first = config.at(1);
-    second = config.at(2);
-    third = config.at(3);
-    QGraphicsTextItem* state = new QGraphicsTextItem(first);
+    /*QGraphicsTextItem* state = new QGraphicsTextItem(first);
     QGraphicsTextItem* rem = new QGraphicsTextItem(second);
     QGraphicsTextItem* stack = new QGraphicsTextItem(third);*/
 
     while(item!=viewRoot->parent())
     {
+        QStringList config = item->text(col).split(QRegExp("\\W+"));
+        QString first, second, third;
+        bool acceptState= false;
+        first = config.at(1);
+        second = config.at(2);
+        third = config.at(3);
+        int state = first.toInt();
+
+        for(auto s : pda.getAcceptStates())
+        {
+           if(state == s)
+           {
+               acceptState=true;
+           }
+        }
+
         //QGraphicsRectItem* actRect = new QGraphicsRectItem(0,0,100,30);
         //scene->addItem(actRect);
         QGraphicsTextItem* text = new QGraphicsTextItem(item->text(col));
 
+        //aktuálisan kijelölt elem
+
         if(item == originalItem)
         {
-            text->setHtml("<h1><b><span style='background-color:#99ccff'>"+item->text(col)+"</span></b></h1>");
+           if(item->childCount() == 0)
+           {
+               if(second == "E" && third == "E" && acceptState)
+               {
+                   text->setHtml("<h1><b><span style='background-color:#66ff33'>"+item->text(col)+"</span></b></h1>");
+               }
+
+               else
+               {
+                text->setHtml("<h1><b><span style='background-color:red'>"+item->text(col)+"</span></b></h1>");
+               }
+
+           }
+           else
+           {
+                text->setHtml("<h1><b><span style='background-color:#33ccff'>"+item->text(col)+"</span></b></h1>");
+           }
         }
+        //szülők
 
         else
         {
-            text->setHtml("<h1><b><span style='background-color:#0000ff'>"+item->text(col)+"</span></b></h1>");
+                text->setHtml("<h1><b><span style='background-color:#99ccff'>"+item->text(col)+"</span></b></h1>");
         }
-
-        //gyerekeit
+        //gyerekek
         if(item == originalItem)
         {
             QList<QTreeWidgetItem*> children = item->takeChildren();
@@ -311,7 +340,7 @@ void MainWindow::clickedOnConfigElement(QTreeWidgetItem* item, int col)
               //actChildRect->setBrush(QBrush(Qt::red, Qt::SolidPattern));
               //scene->addItem(actChildRect);
                 QGraphicsTextItem* actChildText = new QGraphicsTextItem(child->text(col));
-                actChildText->setHtml("<h1><b><span style='background-color:#33ccff'>"+child->text(col)+"</span></b></h1>");
+                actChildText->setHtml("<h1><b><span style='background-color:#006699'>"+child->text(col)+"</span></b></h1>");
                 scene->addItem(actChildText);
 
                 childDistance =160;
