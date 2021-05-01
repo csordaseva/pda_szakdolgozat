@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    ui->treeWidget->setExpandsOnDoubleClick(false);
     scene = new QGraphicsScene();
     ui->graphicsView->setScene(scene);
     scene2 = new QGraphicsScene();
@@ -29,8 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pdaView->show();
 
     connect(ui->pushButton_close, SIGNAL(clicked()), this, SLOT(close()));
-    connect(ui->treeWidget, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(clickedOnConfigElement(QTreeWidgetItem*, int)));
-    connect(ui->treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(doubleClickedOnConfigElement(QTreeWidgetItem*, int)));
+    connect(ui->treeWidget, SIGNAL(itemPressed(QTreeWidgetItem*, int)), this, SLOT(clickedOnConfigElement(QTreeWidgetItem*, int)));
 }
 
 MainWindow::~MainWindow()
@@ -219,6 +219,7 @@ void MainWindow::on_pushButton_load_clicked()
     pda.toSVG(dotFileName);
     QImage* image = new QImage(dotFileName + ".svg");
     QGraphicsPixmapItem* item = new QGraphicsPixmapItem(QPixmap::fromImage(*image));
+    scene2->clear();
     scene2->addItem(item);
     ui->pdaView->show();
 
@@ -245,6 +246,8 @@ void MainWindow::on_pushButton_load_clicked()
 
 void MainWindow::on_pushButton_configs_clicked()
 {
+    disconnect(ui->treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(doubleClickedOnConfigElement(QTreeWidgetItem*, int)));
+    ui->treeWidget->clear();
     QString word;
     word = ui->inputWord->text();
     TreeNode<PDA::Configuration> tree = pda.getConfigurationTree(word.toStdString());
@@ -285,14 +288,15 @@ void MainWindow::clickedOnConfigElement(QTreeWidgetItem* item, int col)
         //QGraphicsRectItem* actRect = new QGraphicsRectItem(0,0,100,30);
         //scene->addItem(actRect);
         QGraphicsTextItem* text = new QGraphicsTextItem(item->text(col));
+
         if(item == originalItem)
         {
-            text->setHtml("<h1><b><span style='background-color:yellow'>"+item->text(col)+"</span></b></h1>");
+            text->setHtml("<h1><b><span style='background-color:#99ccff'>"+item->text(col)+"</span></b></h1>");
         }
 
         else
         {
-            text->setHtml("<h1><b><span style='background-color:#83f52c'>"+item->text(col)+"</span></b></h1>");
+            text->setHtml("<h1><b><span style='background-color:#0000ff'>"+item->text(col)+"</span></b></h1>");
         }
 
         //gyerekeit
@@ -306,9 +310,8 @@ void MainWindow::clickedOnConfigElement(QTreeWidgetItem* item, int col)
               //actChildRect->setBrush(QBrush(Qt::red, Qt::SolidPattern));
               //scene->addItem(actChildRect);
                 QGraphicsTextItem* actChildText = new QGraphicsTextItem(child->text(col));
-                actChildText->setHtml("<h1><b><span style='background-color:red'>"+child->text(col)+"</span></b></h1>");
+                actChildText->setHtml("<h1><b><span style='background-color:#33ccff'>"+child->text(col)+"</span></b></h1>");
                 scene->addItem(actChildText);
-                actChildText->setDefaultTextColor(Qt::white);
 
                 childDistance += 60;
                 //actChildRect->setPos(0, 20+childDistance);
@@ -341,6 +344,8 @@ void MainWindow::doubleClickedOnConfigElement(QTreeWidgetItem* item, int col){
 
 void MainWindow::on_pushButton_configs_manual_clicked()
 {
+    connect(ui->treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(doubleClickedOnConfigElement(QTreeWidgetItem*, int)));
+    ui->treeWidget->clear();
     QString word;
     word = ui->inputWord->text();
     TreeNode<PDA::Configuration> tree = pda.getConfigurationTree(word.toStdString());
