@@ -290,7 +290,9 @@ void PDA::setAcceptStates(const State &value){
 }
 
 void PDA::toDot(QString filename){
+
     QFile file(filename);
+
     if(!file.open(QFile::WriteOnly | QFile::Text))
     {
         qDebug() << "Could not open file for writing.";

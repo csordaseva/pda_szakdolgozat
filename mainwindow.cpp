@@ -177,6 +177,7 @@ void MainWindow::readFromXML(PDA *pda)
     QDomDocument document;
     QString selfilter = tr("XML files (*.xml)");
     QString filename = QFileDialog::getOpenFileName(this, "Open file", "C://", selfilter);
+
     QFile file(filename);
 
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -242,6 +243,7 @@ void MainWindow::on_pushButton_load_clicked()
         qDebug() << "pop: " << QString::fromStdString(t.pop);
         qDebug() << "-------------";
     }*/
+
 }
 
 void MainWindow::on_pushButton_configs_clicked()
@@ -340,7 +342,7 @@ void MainWindow::clickedOnConfigElement(QTreeWidgetItem* item, int col)
               //actChildRect->setBrush(QBrush(Qt::red, Qt::SolidPattern));
               //scene->addItem(actChildRect);
                 QGraphicsTextItem* actChildText = new QGraphicsTextItem(child->text(col));
-                actChildText->setHtml("<h1><b><span style='background-color:#006699'>"+child->text(col)+"</span></b></h1>");
+                actChildText->setHtml("<h1><b><span style='background-color:#00cc99'>"+child->text(col)+"</span></b></h1>");
                 scene->addItem(actChildText);
 
                 childDistance =160;
@@ -359,13 +361,14 @@ void MainWindow::clickedOnConfigElement(QTreeWidgetItem* item, int col)
     QList<QGraphicsItem *> rects = scene->items(Qt::AscendingOrder);
     std::sort(rects.begin(), rects.end(), itemLess);
     QPoint start, end;
-    for(int i = 0; i < rects.size()-1; i++)
+    for(int i = 0; i < rects.size()-2; i++)
     {
         //meg kell különböztetni a gyerekelemeket
         start = QPoint(rects.at(i)->scenePos().x()+65, rects.at(i)->scenePos().y()+rects.at(i)->boundingRect().height());
         end = QPoint(rects.at(i+1)->scenePos().x()+65, rects.at(i+1)->scenePos().y());
         if(start.x() == end.x())
         {
+            if(rects.at(i+1)->x() == rects.at(i+2)->x())
             scene->addLine(QLine(start, end));
         }
     }
@@ -376,8 +379,7 @@ void MainWindow::doubleClickedOnConfigElement(QTreeWidgetItem* item, int col){
     createTreeViewByClicking(searchByConfigName(tree, item->text(col)), item);
 }
 
-void MainWindow::on_pushButton_configs_manual_clicked()
-{
+void MainWindow::on_pushButton_configs_manual_clicked(){
     connect(ui->treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(doubleClickedOnConfigElement(QTreeWidgetItem*, int)));
     ui->treeWidget->clear();
     QString word;

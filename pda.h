@@ -16,6 +16,7 @@
 #include <gvc.h>
 #include <cgraph.h>
 #include <qprocess.h>
+#include <QFileInfo>
 
 class PDA {
 
