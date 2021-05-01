@@ -270,7 +270,8 @@ void MainWindow::on_pushButton_configs_clicked()
 void MainWindow::clickedOnConfigElement(QTreeWidgetItem* item, int col)
 {
     int distance = 100;
-    int childDistance = 100;
+    int childDistance = 0;
+    int childDistanceWidth =0;
     scene->clear();
     QTreeWidgetItem* originalItem = item;
 
@@ -313,9 +314,10 @@ void MainWindow::clickedOnConfigElement(QTreeWidgetItem* item, int col)
                 actChildText->setHtml("<h1><b><span style='background-color:#33ccff'>"+child->text(col)+"</span></b></h1>");
                 scene->addItem(actChildText);
 
-                childDistance += 60;
+                childDistance =160;
                 //actChildRect->setPos(0, 20+childDistance);
-                actChildText->setPos(0, 40+childDistance);
+                actChildText->setPos(childDistanceWidth,childDistance);
+                childDistanceWidth += actChildText->boundingRect().width();
             }
             item->addChildren(children);
         }
@@ -331,9 +333,12 @@ void MainWindow::clickedOnConfigElement(QTreeWidgetItem* item, int col)
     for(int i = 0; i < rects.size()-1; i++)
     {
         //meg kell különböztetni a gyerekelemeket
-        start = QPoint(rects.at(i)->scenePos().x()+65, rects.at(i)->scenePos().y()+rects.at(0)->boundingRect().height());
+        start = QPoint(rects.at(i)->scenePos().x()+65, rects.at(i)->scenePos().y()+rects.at(i)->boundingRect().height());
         end = QPoint(rects.at(i+1)->scenePos().x()+65, rects.at(i+1)->scenePos().y());
-        scene->addLine(QLine(start, end));
+        if(start.x() == end.x())
+        {
+            scene->addLine(QLine(start, end));
+        }
     }
 }
 
