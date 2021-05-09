@@ -250,6 +250,7 @@ void MainWindow::on_pushButton_configs_clicked()
 {
     disconnect(ui->treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(doubleClickedOnConfigElement(QTreeWidgetItem*, int)));
     ui->treeWidget->clear();
+    scene->clear();
     QString word;
     word = ui->inputWord->text();
     TreeNode<PDA::Configuration> tree = pda.getConfigurationTree(word.toStdString());
@@ -382,6 +383,7 @@ void MainWindow::doubleClickedOnConfigElement(QTreeWidgetItem* item, int col){
 void MainWindow::on_pushButton_configs_manual_clicked(){
     connect(ui->treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(doubleClickedOnConfigElement(QTreeWidgetItem*, int)));
     ui->treeWidget->clear();
+    scene->clear();
     QString word;
     word = ui->inputWord->text();
     TreeNode<PDA::Configuration> tree = pda.getConfigurationTree(word.toStdString());

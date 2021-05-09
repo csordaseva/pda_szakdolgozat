@@ -36,7 +36,7 @@ public:
     using Transitions = std::vector<Transition>;
 
     struct Configuration {
-        int state;
+        State state;
         std::string remaining;
         std::list<StackSymbol> stack;
         bool operator< (const Configuration& other) const;
