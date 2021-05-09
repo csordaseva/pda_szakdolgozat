@@ -94,7 +94,7 @@ private:
     std::set<State> acceptStates;
     Transitions transitions;
 
-    void expand(TreeNode<Configuration>& configuration_tree) const;
+    void expand(TreeNode<Configuration>& configuration_tree, int depth) const;
 };
 
 std::ostream& operator<< (std::ostream& s, const PDA::Configuration& c);

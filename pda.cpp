@@ -66,12 +66,16 @@ std::set<PDA::Configuration> PDA::yieldInOneStep(Configuration& c) const {
 
 
 
-void PDA::expand(TreeNode<Configuration>& configuration_tree) const {
+void PDA::expand(TreeNode<Configuration>& configuration_tree, int depth=0) const {
+    int limit = 20;
     for (auto child_configuration : yieldInOneStep(configuration_tree.data))
     {
-        TreeNode<Configuration> child{ child_configuration , {} };
-        expand(child);
-        configuration_tree.children.push_back(child);
+        if(depth < limit)
+        {
+            TreeNode<Configuration> child{ child_configuration , {} };
+            expand(child, depth+1);
+            configuration_tree.children.push_back(child);
+        }
     }
 }
 
@@ -80,7 +84,6 @@ TreeNode<PDA::Configuration> PDA::getConfigurationTree(std::string word) const {
     expand(tree);
     return tree;
 }
-
 
 std::ostream& operator<< (std::ostream& s, const PDA::Configuration& c){
     s << "( " << c.state << " , ";
@@ -171,8 +174,8 @@ bool PDA::canMove(const Configuration& c, const Transition& t) const{
 }
 
 PDA::Configuration PDA::move(const Configuration& c, const Transition& t) const {
-    if (canMove(c, t))
-    {
+    //if (canMove(c, t))
+    //{
         auto new_c = Configuration(c);
         for (unsigned int i = 0; i < t.to.size(); i++)
         {
@@ -189,8 +192,8 @@ PDA::Configuration PDA::move(const Configuration& c, const Transition& t) const 
             }
         }
         return new_c;
-    }
-    return c;
+    //}
+    //return c;
 }
 
 std::set<State> PDA::getStates() const{
