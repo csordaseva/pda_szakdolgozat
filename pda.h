@@ -13,8 +13,8 @@
 #include <QDebug>
 #include <QTreeWidgetItem>
 #include "tree.h"
-#include <gvc.h>
-#include <cgraph.h>
+//#include <gvc.h>
+//#include <cgraph.h>
 #include <qprocess.h>
 #include <QFileInfo>
 

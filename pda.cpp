@@ -352,7 +352,7 @@ QString PDA::transitionsToDot(){
         {
             for(auto t : tr.to)
             {
-                transitionList += QString(QString::number(tr.from) + " -> " + QString::number(t) + "[label=\"e\"]");
+                transitionList += QString(QString::number(tr.from) + " -> " + QString::number(t) + "[label=\"" + QString::fromStdString(tr.symbols) + "\"]");
             }
         }
     }

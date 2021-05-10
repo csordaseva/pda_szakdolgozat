@@ -25,13 +25,16 @@
         <enum>Qt::Horizontal</enum>
        </property>
        <widget class="QTreeWidget" name="treeWidget">
+        <attribute name="headerVisible">
+         <bool>false</bool>
+        </attribute>
         <column>
          <property name="text">
           <string notr="true">1</string>
          </property>
         </column>
        </widget>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <layout class="QVBoxLayout" name="verticalLayout">
