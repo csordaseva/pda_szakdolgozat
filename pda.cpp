@@ -1,5 +1,7 @@
 #include "pda.h"
 
+#define MAXDEPTH 20
+
 using State = int;
 using StackSymbol = char;
 using Transitions = std::vector<PDA::Transition>;
@@ -67,15 +69,12 @@ std::set<PDA::Configuration> PDA::yieldInOneStep(Configuration& c) const {
 
 
 void PDA::expand(TreeNode<Configuration>& configuration_tree, int depth=0) const {
-    int limit = 20;
+    if(depth >= MAXDEPTH) return;
     for (auto child_configuration : yieldInOneStep(configuration_tree.data))
     {
-        if(depth < limit)
-        {
             TreeNode<Configuration> child{ child_configuration , {} };
             expand(child, depth+1);
-            configuration_tree.children.push_back(child);
-        }
+            configuration_tree.children.push_back(child);        
     }
 }
 
@@ -335,24 +334,24 @@ QString PDA::transitionsToDot(){
         transitionList += "\n\t";
         if(QString::fromStdString(tr.symbols) == "" && tr.to.size() == 1)
         {
-           transitionList += QString(QString::number(tr.from) + " -> " + QString::number(tr.to.front()) + "[label=\"e\"]");
+           transitionList += QString(QString::number(tr.from) + " -> " + QString::number(tr.to.front()) + "[label=\"e;" + " " + QString::fromStdString(tr.pop) + "; " + QString::fromStdString(tr.push) + "\"]");
         }
         else if(QString::fromStdString(tr.symbols) == "" && tr.to.size() > 1)
         {
            for(auto t : tr.to)
            {
-               transitionList += QString(QString::number(tr.from) + " -> " + QString::number(t) + "[label=\"e\"]");
+               transitionList += QString(QString::number(tr.from) + " -> " + QString::number(t) + "[label=\"e;" + " " + QString::fromStdString(tr.pop) + "; " + QString::fromStdString(tr.push) + "\"]");
            }
         }
         else if(QString::fromStdString(tr.symbols) != "" && tr.to.size() == 1)
         {
-            transitionList += QString(QString::number(tr.from) + " -> " + QString::number(tr.to.front()) + "[label=\"" + QString::fromStdString(tr.symbols) + "\"]");
+            transitionList += QString(QString::number(tr.from) + " -> " + QString::number(tr.to.front()) + "[label=\"" + QString::fromStdString(tr.symbols) + QString::fromStdString(tr.pop) + "; " + QString::fromStdString(tr.push) + "\"]");
         }
         else
         {
             for(auto t : tr.to)
             {
-                transitionList += QString(QString::number(tr.from) + " -> " + QString::number(t) + "[label=\"" + QString::fromStdString(tr.symbols) + "\"]");
+                transitionList += QString(QString::number(tr.from) + " -> " + QString::number(t) + "[label=\"" + QString::fromStdString(tr.symbols) + QString::fromStdString(tr.pop) + "; " + QString::fromStdString(tr.push) + "\"]");
             }
         }
     }
